@@ -41,6 +41,6 @@ Usually, auto generated beatmaps can contain formatting, but it can happen with 
 3) Run `BeatSaberBeatmapsFixer.exe`
 4) Select your `CustomLevels` directory (usually, located in `C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomLevels`)
 5) Wait for analyzis and select beatmaps you need to fix (just enter numbers)
-![Application](https://github.com/Ivan-Alone/BeatSaber_v1.20.0_Beatmaps_Fixer/blob/main/img/consle.jpg?raw=true)
+![Application](https://github.com/Ivan-Alone/BeatSaber_v1.20.0_Beatmaps_Fixer/blob/1.20.0/img/consle.jpg?raw=true)
 6) Press Enter, and beatmaps will fixed
 7) Enjoy playing!
