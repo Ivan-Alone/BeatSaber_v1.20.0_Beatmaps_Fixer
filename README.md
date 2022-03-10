@@ -30,6 +30,14 @@ is invalid level, and beatmap with it will show infinite loading ring in menu.
 
 Usually, auto generated beatmaps can contain formatting, but it can happen with any custom beatmap created with third-party editor, for example.
 
+Also with that, was broken other function of beatmaps loading: now game requires correct order of datasets in level file. It means that in older version I could create level like this:
+
+```json
+{"_customLevelData":"testtesttest","_version":"2.0.0","_test":123,"_notes":[],"_events":[],"_obstacles":[]}
+```
+
+In new version it will shows infinite loading ring, but not game.
+
 ## How to fix
 1) Wait fix from modding community
 2) Wait for update game to new version with fixed algorhytm
