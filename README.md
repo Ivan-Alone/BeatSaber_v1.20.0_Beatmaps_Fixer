@@ -33,10 +33,12 @@ Usually, auto generated beatmaps can contain formatting, but it can happen with 
 Also with that, was broken other function of beatmaps loading: now game requires correct order of datasets in level file. It means that in older version I could create level like this:
 
 ```json
-{"_customLevelData":"testtesttest","_version":"2.0.0","_test":123,"_notes":[],"_events":[],"_obstacles":[]}
+{"_customLevelData":"testtesttest","_version":"2.0.0","_notes":[],"_events":[],"_obstacles":[]}
 ```
 
-In new version it will shows infinite loading ring, but not game.
+In new version it will shows infinite loading ring, but not game. 
+
+This happens with any beatmap that have no `"_version": "2.*.*"` descriptor (example: [This Game - No game No Life \(TV Size\)](https://beatsaver.com/maps/63a5), [LiSA - ADAMAS \(TV Size\)](https://beatsaver.com/maps/68ae), [Rasputin \(Funk Overload\)](https://beatsaver.com/maps/6adc)), or with any other descriptor in begin of beatmap file (like in my example upper).
 
 ## How to fix
 1) Wait fix from modding community
