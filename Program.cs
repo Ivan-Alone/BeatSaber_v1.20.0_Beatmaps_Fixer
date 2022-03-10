@@ -15,6 +15,7 @@ namespace BeatSaberBeatmapsFixer
 
 	class Program
 	{
+		static string[] DefaultOrder = { "_version", "_events", "_notes", "_obstacles" };
 		static string info = "info.dat";
 		[STAThread]
 		static void Main(string[] args)
@@ -39,10 +40,12 @@ namespace BeatSaberBeatmapsFixer
 
 					Console.WriteLine("Now we are scanning your beatmaps directory to find broken beatmaps...");
 					Console.WriteLine();
-					foreach (var dir in dirs) {
+					foreach (var dir in dirs)
+					{
 						if (File.Exists(Path.Combine(dir, info)))
 						{
-							foreach (var lvl in Directory.GetFiles(dir, "*.dat")) {
+							foreach (var lvl in Directory.GetFiles(dir, "*.dat"))
+							{
 								if (Path.GetFileName(lvl.ToLower()) == info.ToLower()) continue;
 								bool needMapToBeFixed = false;
 
@@ -52,37 +55,45 @@ namespace BeatSaberBeatmapsFixer
 									r.Close();
 
 									bool isStringNow = false;
-									char[] prevs = {(char)0, (char)0 };
 									int i = 0;
 									bool nextScreened = false;
 
-									foreach (char c in json.Trim()) {
+									// Checking any char in JSON to find formatting
+									foreach (char c in json.Trim())
+									{
+										// If current char is escaped by backslash, current symbol is not formatting
 										if (nextScreened)
 										{
 											nextScreened = false;
 										}
 										else
 										{
-											if (c == '\\')
+											// Escaping test
+											if (isStringNow && c == '\\')
 											{
 												nextScreened = true;
 											}
+											// String begin test
 											else if (c == '"')
 											{
 												isStringNow = !isStringNow;
 											}
 											else
 											{
-												if (!isStringNow && (c == '\r' || c == '\n' || c == '\t' || c == ' ')) {
+												// If non-string now and formatting char found, beatmap needs to be fixed
+												if (!isStringNow && (c == '\r' || c == '\n' || c == '\t' || c == ' '))
+												{
 													needMapToBeFixed = true;
 													break;
 												}
 											}
 										}
-
-										prevs[0] = prevs[1];
-										prevs[1] = c;
 										i++;
+									}
+
+									if (!needMapToBeFixed && !IsBeatmapLoadable(JsonConvert.DeserializeObject<JObject>(json)))
+									{
+										needMapToBeFixed = true;
 									}
 								}
 
@@ -99,7 +110,8 @@ namespace BeatSaberBeatmapsFixer
 						Console.WriteLine("These beatmaps seems to be broken. Please check them and input NUMBERS what you want to fix (leave blank to fix all):");
 						Console.WriteLine();
 						var i = 1;
-						foreach (var bm in brokenBeatmaps) {
+						foreach (var bm in brokenBeatmaps)
+						{
 							Console.WriteLine(i + ". " + GetBeatmapDescription(bm));
 							i++;
 						}
@@ -158,17 +170,18 @@ namespace BeatSaberBeatmapsFixer
 
 							foreach (var lvl in Directory.GetFiles(beatmap, "*.dat"))
 							{
-								if (Path.GetFileName(lvl.ToLower()) == info.ToLower()) continue;
+								if (Path.GetFileName(lvl.ToLower()) == info.ToLower()) continue; // If info.dat file - it does not needs any fix
 
 								using (StreamReader r = new StreamReader(lvl))
 								{
 									string json = r.ReadToEnd();
-									JObject  j = JsonConvert.DeserializeObject<JObject>(json);
+									JObject j = JsonConvert.DeserializeObject<JObject>(json);
+									j = RecompileOrder(j); // Fixing descriptors order in Beatmap file
 
-									File.Copy(lvl, lvl + ".bak", true);
+									File.Copy(lvl, lvl + ".bak", true); // Creating backup
 									r.Close();
 
-									File.WriteAllText(lvl, JsonConvert.SerializeObject(j));
+									File.WriteAllText(lvl, JsonConvert.SerializeObject(j)); // Write fixed level file
 								}
 							}
 						}
@@ -181,7 +194,8 @@ namespace BeatSaberBeatmapsFixer
 						Console.WriteLine("No possible broken beatmap found!");
 					}
 				}
-				else {
+				else
+				{
 					Console.WriteLine("Selection was cancelled, aborting!");
 				}
 			}
@@ -210,6 +224,47 @@ namespace BeatSaberBeatmapsFixer
 
 				return obj.GetValue("_songAuthorName").ToString() + (sub_test.Length > 0 ? " (" + sub_test + ")" : "") + " - " + obj.GetValue("_songName").ToString() + (auth_test.Length > 0 ? " [" + auth_test + "]" : "");
 			}
+		}
+		public static bool IsBeatmapLoadable(JObject beatmap) {
+			var en = beatmap.GetEnumerator();
+			while (en.MoveNext())
+			{
+				if (en.Current.Key == DefaultOrder[0] // For detecting (possible) valid v2.*.* beatmaps 
+					|| en.Current.Key == "version") // For ckecking (possible) valid v3.0.0 beatmaps
+				{
+					return true;
+				}
+				break;
+			}
+
+			return false;
+		}
+		public static JObject RecompileOrder(JObject obj) {
+			JObject recompile = new JObject();
+
+			if (!obj.TryGetValue(DefaultOrder[0], out JToken mz)) // Detecting beatmaps that does not have any "_version" descriptor. It can happens too, and it's bad, and needs to be fixed.
+			{
+				recompile.Add(DefaultOrder[0], "2.0.0");
+			}
+
+			foreach (var order in DefaultOrder)
+			{
+				if (obj.TryGetValue(order, out JToken val))
+				{
+					recompile.Add(order, val);
+				}
+			}
+			var en = obj.GetEnumerator();
+			while (en.MoveNext())
+			{
+				var cur = en.Current;
+				if (!recompile.TryGetValue(cur.Key, out JToken val))
+				{
+					recompile.Add(cur.Key, cur.Value);
+				}
+			}
+
+			return recompile;
 		}
 	}
 }
