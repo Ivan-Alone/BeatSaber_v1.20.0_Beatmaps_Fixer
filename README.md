@@ -41,7 +41,7 @@ In new version it will shows infinite loading ring, but not game.
 This happens with any beatmap that have no `"_version": "2.*.*"` descriptor (example: [This Game - No game No Life \(TV Size\)](https://beatsaver.com/maps/63a5), [LiSA - ADAMAS \(TV Size\)](https://beatsaver.com/maps/68ae), [Rasputin \(Funk Overload\)](https://beatsaver.com/maps/6adc)), or with any other descriptor in begin of beatmap file (like in my example upper).
 
 ## How to fix
-1) Wait fix from modding community
+1) Wait fix from modding community (**UPD. 19.03.2022** I just tested ModAssistant in 1.20.0, and yes, Mods developers (SongCore) created all needed fixes for beatmaps loading, so you can just install mods via ModAssistant and not use my fixer, any beatmaps will loaded correctly)
 2) Wait for update game to new version with fixed algorhytm
 3) Download my fixer and fix all you Beatmaps via this.
 
